@@ -87,8 +87,10 @@ class TodoListModel extends ChangeNotifier {
   void updateTodo(Todo todo) {
     assert(todo != null);
     assert(todo.id != null);
+    // Breakpoint here
     var oldTodo = _todos.firstWhere((it) => it.id == todo.id);
     var replaceIndex = _todos.indexOf(oldTodo);
+    // When stepping over this line, the visualization will update
     _todos.replaceRange(replaceIndex, replaceIndex + 1, [todo]);
     notifyListeners();
     _uploadItems();
@@ -123,4 +125,20 @@ class TodoListModel extends ChangeNotifier {
       todos.where((Todo todo) => !todo.complete).toList().length;
 
   bool get hasActiveTodos => numActive > 0;
+}
+
+String todoTree(UnmodifiableListView<Todo> todos) {
+  final children = todos
+      .map((t) => TreeNode(
+            [
+              if ((t.note?.length ?? 0) > 0)
+                TreeNode([], [TreeNodeItem(t.note)]),
+              TreeNode([], [TreeNodeItem(t.complete ? 'Done' : 'Incomplete')]),
+            ],
+            [TreeNodeItem(t.task)],
+            t.task,
+          ))
+      .toList();
+  final root = TreeNode(children, [], 'TODOs');
+  return tree(root);
 }
